@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./loading.css">
+    <script src="./loading.js"></script>
+</head>
+
+<body>
+    <script>
+        // showLoading()
+        // setTimeout(() => {
+        //     hideLoading()
+        // }, 2000)
+        // 判断一个字符串中出现次数最多的字符，统计这个次数
+        // abaasdffggghhjjkkgfddsssss3444343
+        function getMaxNum(str) {
+            let charArr = [],
+                nums = [];
+            for (let i = 0; i < str.length; i++) {
+                let index = charArr.indexOf(str[i])
+                if (index > -1) {
+                    nums[index]++;
+                } else {
+                    charArr.push(str[i]);
+                    nums.push(1);
+                }
+            }
+            let maxNum = Math.max(...nums);
+            let index = nums.indexOf(maxNum);
+            let maxChar = charArr[index];
+            console.log(maxChar, maxNum);
+        }
+        let str = 'abaasdffggghhjjkkgfddsssss3444343';
+        getMaxNum(str);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+/*清除浮动*/
+
+.clearfix:after {
+    content: '\20';
+    display: block;
+    height: 0;
+    clear: both;
+    overflow: hidden;
+}
+
+.clearfix {
+    *zoom: 1;
+}
+
+
+/* 单行文字溢出隐藏 */
+
+.text-ellipsis {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 90%;
+}
+
+.text-ellipsis_rows {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
