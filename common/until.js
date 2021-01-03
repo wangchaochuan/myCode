@@ -18,7 +18,7 @@ const attempt = (fn, ...args) => {
         return e instanceof Error ? e : new Error(e);
     }
 };
-var elements = attempt(function(selector) {
+var elements = attempt(function (selector) {
     return document.querySelectorAll(selector);
 }, ">_>");
 // if (elements instanceof Error) elements = []; // elements = []
@@ -174,7 +174,7 @@ const findLast = (
 const flatten = (arr, depth = 1) =>
     arr.reduce(
         (a, v) =>
-        a.concat(depth > 1 && Array.isArray(v) ? flatten(v, depth - 1) : v), []
+            a.concat(depth > 1 && Array.isArray(v) ? flatten(v, depth - 1) : v), []
     );
 
 // flatten([1, [2], 3, 4]); // [1, 2, 3, 4]
@@ -183,9 +183,9 @@ const flatten = (arr, depth = 1) =>
 // 34、按照给定的函数条件，从数组的右边往左依次进行执行。
 const forEachRight = (arr, callback) =>
     arr
-    .slice(0)
-    .reverse()
-    .forEach(callback);
+        .slice(0)
+        .reverse()
+        .forEach(callback);
 
 // forEachRight([1, 2, 3, 4], val => console.log(val)); // '4', '3', '2', '1'
 
@@ -214,10 +214,10 @@ const getStyle = (el, ruleName) => getComputedStyle(el)[ruleName];
 // 40、此段代码的主要功能就是返回数据的类型。
 const getType = v =>
     v === undefined ?
-    "undefined" :
-    v === null ?
-    "null" :
-    v.constructor.name.toLowerCase();
+        "undefined" :
+        v === null ?
+            "null" :
+            v.constructor.name.toLowerCase();
 // getType(new Set([1, 2, 3])); // 'set'
 
 // 41、此段代码返回DOM元素是否包含指定的Class样式。
@@ -271,11 +271,11 @@ const isAfterDate = (dateA, dateB) => dateA > dateB;
 const isAnagram = (str1, str2) => {
     const normalize = str =>
         str
-        .toLowerCase()
-        .replace(/[^a-z0-9]/gi, "")
-        .split("")
-        .sort()
-        .join("");
+            .toLowerCase()
+            .replace(/[^a-z0-9]/gi, "")
+            .split("")
+            .sort()
+            .join("");
     return normalize(str1) === normalize(str2);
 };
 // isAnagram('iceman', 'cinema'); // true
@@ -290,19 +290,18 @@ const isBeforeDate = (dateA, dateB) => dateA < dateB;
 
 // 54、对象深度克隆
 const deepClone = origin => {
-    if (origin === null) return null;
-    let target = origin.push ? [] : {};
-    for (let prop in origin) {
+    if (typeof origin === null || typeof origin !== 'object') {
+        return origin;
+    }
+    const target = Array.isArray(origin) ? [] : {};
+    target.__proto__ = origin.__proto__;
+    for (const prop in origin) {
         if (origin.hasOwnProperty(prop)) {
-            if (typeof origin[prop] === "object") {
-                target[prop] = deepClone(origin[prop]);
-            } else {
-                target[prop] = origin[prop];
-            }
+            target[prop] = typeof origin[prop] === 'object' ? deepClone(origin[prop]) : origin[prop];
         }
     }
     return target;
-};
+}
 
 // 55、格式化金钱
 const ThousandNum = num => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -311,16 +310,16 @@ const ThousandNum = num => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 // 56、生成随机ID
 const RandomId = len =>
     Math.random()
-    .toString(36)
-    .substr(3, len);
+        .toString(36)
+        .substr(3, len);
 // const id = RandomId(10);// id => "jg7zpgiqva"
 
 // 57、生成随机HEX色值
 const RandomColor = () =>
     "#" +
     Math.floor(Math.random() * 0xffffff)
-    .toString(16)
-    .padEnd(6, "0");
+        .toString(16)
+        .padEnd(6, "0");
 // const color = RandomColor();// color => "#f03665"
 
 // 58、生成星级评分

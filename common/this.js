@@ -21,7 +21,7 @@ Function.prototype.myBind = function(context) {
     throw new TypeError("Error");
   }
   var that = this;
-  var args = [...arguments].splice(1);
+  var args = [...arguments].slice(1);
   return function F() {
     if (this instanceof F) {
       return new that(...args, ...arguments);
