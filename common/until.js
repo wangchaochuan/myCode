@@ -464,3 +464,43 @@ function getBytes(str) {
     }
     return bytes;
 }
+// 82、防抖
+const debounce = (fn, wait = 50, immediate = false) => {
+    let timer, ctx, args;
+    // 延迟执行函数
+    const later = () => setTimeout(() => {
+        timer = null;
+        if (!immediate) {
+            fn.call(ctx, ...args);
+            ctx = args = null;
+        }
+    }, wait);
+    return function () {
+        if (!timer) {
+            timer = later();
+            // 如果是立即执行则调用函数，否则缓存this和argument;
+            if (immediate) {
+                fn.call(this, ...arguments);
+            } else {
+                ctx = this;
+                args = [...arguments];
+            }
+        } else {
+            clearTimeout(timer);
+            timer = later();
+        }
+    }
+}
+
+// 83、节流  防抖动是将多次执行变为最后一次执行，节流是将多次执行变成每隔一段时间执行。
+const throttle = (fn, wait = 50) => {
+    let timer = null;
+    return function () {
+        if (!timer) {
+            timer = setTimeout(() => {
+                fn.apply(this, arguments);
+                timer = null;
+            }, wait)
+        }
+    }
+}

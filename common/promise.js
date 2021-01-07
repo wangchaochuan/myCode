@@ -1,166 +1,117 @@
-/* 手写promise */
-const PENDING = "pending";
-const FULFILLED = "fulfilled";
-const REJECTED = "rejected";
-function resolvePromise(promise2, x, resolve, reject) {
-  if (x === promise2) {
-    return reject(new TypeError("Chaining cycle detected for promise"));
-  }
-  let called;
-  if (x != null && (typeof x === "object" || typeof x === "function")) {
-    try {
-      let then = x.then;
-      if (typeof then === "function") {
-        then.call(
-          x,
-          y => {
-            if (called) return;
-            called = true;
-            resolvePromise(promise2, y, resolve, reject);
-          },
-          err => {
-            if (called) return;
-            called = true;
-            reject(err);
-          }
-        );
-      } else {
-        resolve(x);
-      }
-    } catch (e) {
-      if (called) return;
-      called = true;
-      reject(e);
-    }
-  } else {
-    resolve(x);
-  }
-}
 class Promise {
-  constructor(executor) {
-    this.state = PENDING;
-    this.value = undefined;
-    this.reason = undefined;
-    this.onFulfilledCallbacks = [];
-    this.onRejectedCallbacks = [];
-    let reslove = value => {
-      if (this.state == PENDING) {
-        this.state = FULFILLED;
-        this.value = value;
-        this.onFulfilledCallbacks.forEach(onFulfilled => {
-          onFulfilled();
-        });
-      }
-    };
-    let reject = reason => {
-      if (this.state == PENDING) {
-        this.state = REJECTED;
-        this.reason = reason;
-        this.onRejectedCallbacks.forEach(onRejected => {
-          onRejected();
-        });
-      }
-    };
-    try {
-      executor(reslove, reject);
-    } catch (error) {
-      reject(error);
+    constructor(exector) {
+        this.status = 'pending';
+        this.value = undefined;
+        this.reason = undefined;
+        this.onReslovedCallbacks = [];
+        this.onRejcetedCallbacks = []
+        let reslove = value => {
+            if (this.status == 'pending') {
+                this.status = 'resloved';
+                this.value = value;
+                this.onReslovedCallbacks.forEach(cb => cb())
+            }
+        }
+        let reject = reson => {
+            if (this.status == 'pending') {
+                this.status = 'rejected';
+                this.reson = reson;
+                this.onRejcetedCallbacks.forEach(cb => cb())
+            }
+        }
+        try {
+            exector(reslove, reject);
+        } catch (error) {
+            reject(error)
+        }
     }
-  }
-  then(onFulfilled, onRejected) {
-    onFulfilled =
-      typeof onFulfilled === "function" ? onFulfilled : value => value;
-    onRejected =
-      typeof onRejected === "function"
-        ? onRejected
-        : err => {
-            throw err;
-          };
-    let promise2 = new Promise((resolve, reject) => {
-      if (this.state === "fulfilled") {
-        setTimeout(() => {
-          try {
-            let x = onFulfilled(this.value);
-            resolvePromise(promise2, x, resolve, reject);
-          } catch (e) {
-            reject(e);
-          }
-        }, 0);
-      }
-      if (this.state === "rejected") {
-        setTimeout(() => {
-          try {
-            let x = onRejected(this.reason);
-            resolvePromise(promise2, x, resolve, reject);
-          } catch (e) {
-            reject(e);
-          }
-        }, 0);
-      }
-      if (this.state === "pending") {
-        this.onResolvedCallbacks.push(() => {
-          setTimeout(() => {
-            try {
-              let x = onFulfilled(this.value);
-              resolvePromise(promise2, x, resolve, reject);
-            } catch (e) {
-              reject(e);
+    then(onFulFilled, onRejected) {
+        onFulFilled = typeof onFulFilled === 'function' ? onFulFilled : value => value;
+        onRejected = typeof onRejected === 'function' ? onRejected : error => { throw error }
+        let promise2 = new Promise((reslove, reject) => {
+            if (this.status == 'reslove') {
+                setTimeout(() => {
+                    try {
+                        //将上次一then里面的方法传递进下一个Promise的状态
+                        const value = onFulFilled(this.value);
+                        reslove(value);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, 0)
+            } else if (this.status == 'rejected') {
+                setTimeout(() => {
+                    try {
+                        const reason = onRejected(this.reason);
+                        reject(reason);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, 0)
+            } else if (this.status == 'pending') {
+                this.onRejcetedCallbacks.push(() => {
+                    setTimeout(() => {
+                        try {
+                            //将上次一then里面的方法传递进下一个Promise的状态
+                            const value = onFulFilled(this.value);
+                            reslove(value);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }, 0)
+                })
+                this.onReslovedCallbacks.push(() => {
+                    setTimeout(() => {
+                        try {
+                            const reason = onRejected(this.reason);
+                            reject(reason);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }, 0)
+                })
             }
-          }, 0);
-        });
-        this.onRejectedCallbacks.push(() => {
-          setTimeout(() => {
-            try {
-              let x = onRejected(this.reason);
-              resolvePromise(promise2, x, resolve, reject);
-            } catch (e) {
-              reject(e);
+        })
+        return promise2
+    }
+    catch(fn) {
+        return this.then(null, fn)
+    }
+    static reslove(val) {
+        return new Promise((reslove, reject) => {
+            reslove(val)
+        })
+    }
+    static reject(error) {
+        return new Promise((reslove, reject) => {
+            reject(error)
+        })
+    }
+    static race(promises) {
+        return new Promise((reslove, reject) => {
+            for (let i = 0; i < promises.length; i++) {
+                promises[i].then(value => { reslove(value) }, reason => { reject(reason) });
             }
-          }, 0);
-        });
-      }
-    });
-    return promise2;
-  }
-  catch(fn) {
-    return this.then(null, fn);
-  }
+        })
+    }
+    //all方法(获取所有的promise，都执行then，把结果放到数组，一起返回)
+    static all(promises) {
+        const result = [];
+        const len = promises.length;
+        let index = 0;//记录resolve的promise实例数
+        return new Promise((reslove, reject) => {
+            for (let i = 0; i < len; i++) {
+                promises[i].then(data => {
+                    result[i] = data;
+                    index++;
+                    // 所有的promise都成功了
+                    if (index === len) {
+                        reslove(result);
+                    }
+                }, reason => {
+                    reject(reason);
+                })
+            }
+        })
+    }
 }
-Promise.resolve = function(val) {
-  return new Promise((resolve, reject) => {
-    resolve(val);
-  });
-};
-//reject方法
-Promise.reject = function(val) {
-  return new Promise((resolve, reject) => {
-    reject(val);
-  });
-};
-//race方法
-Promise.race = function(promises) {
-  return new Promise((resolve, reject) => {
-    for (let i = 0; i < promises.length; i++) {
-      promises[i].then(resolve, reject);
-    }
-  });
-};
-//all方法(获取所有的promise，都执行then，把结果放到数组，一起返回)
-Promise.all = function(promises) {
-  let arr = [];
-  let i = 0;
-  function processData(index, data) {
-    arr[index] = data;
-    i++;
-    if (i == promises.length) {
-      resolve(arr);
-    }
-  }
-  return new Promise((resolve, reject) => {
-    for (let i = 0; i < promises.length; i++) {
-      promises[i].then(data => {
-        processData(i, data);
-      }, reject);
-    }
-  });
-};
