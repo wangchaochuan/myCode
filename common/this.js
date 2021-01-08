@@ -1,32 +1,36 @@
-Function.prototype.myCall = function(context = window) {
+Function.prototype.myCall = function (context = window, ...args) {
   context.fn = this;
-  let args = [...arguments].slice(1);
   let result = context.fn(...args);
   delete context.fn;
   return result;
 };
-Function.prototype.myApply = function(context = window) {
+Function.prototype.myApply = function (context = window, args) {
   context.fn = this;
   let result;
-  if (arguments[1]) {
-    result = context.fn(...arguments[1]);
+  if (args) {
+    // 需要判断第二个参数是否为数组
+    if (Array.isArray(args)) {
+      result = context.fn(...args);
+    } else {
+      throw new Error('the second params should be an Array.');
+    }
   } else {
     result = context.fn();
   }
   delete context.fn;
   return result;
 };
-Function.prototype.myBind = function(context) {
+Function.prototype.myBind = function (context, ...args) {
+  // 因为是挂载在函数的原型对象上，所以必定是函数调用，所以这一步有点多余
   if (typeof this !== "function") {
     throw new TypeError("Error");
   }
-  var that = this;
-  var args = [...arguments].slice(1);
+  const fn = this;
   return function F() {
-    if (this instanceof F) {
-      return new that(...args, ...arguments);
+    if (fn instanceof F) {
+      return new F(...args, ...arguments);
     }
-    return that.apply(context, args.concat(...arguments));
+    return fn.apply(context, args.concat(...arguments));
   };
 };
 
@@ -57,9 +61,10 @@ const deepClone = origin => {
 };
 
 const curry = (fn, ...args) =>
-  args.length < fn.length
-    ? (...arguments) => curry(fn, ...args, ...arguments)
-    : fn(...args);
+  args.length < fn.length ?
+  (...arguments) => curry(fn, ...args, ...arguments) :
+  fn(...args);
+
 function sumFn(a, b, c) {
   return a + b + c;
 }
