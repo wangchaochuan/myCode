@@ -311,7 +311,7 @@ const ThousandNum = num => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const RandomId = len =>
     Math.random()
         .toString(36)
-        .substr(3, len);
+        .slice(3, 3 + len);
 // const id = RandomId(10);// id => "jg7zpgiqva"
 
 // 57、生成随机HEX色值
